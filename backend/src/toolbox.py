@@ -36,8 +36,9 @@ class Toolbox():
         mv = MovementInspection(boardstate_filepath, boardstate)
         mv.inspectMoveLegality(X, Y, MARK)
         mv.saveMove()
-        game_over = mv.inspectWinSituation()
-        if (game_over):
+        win_situation = mv.inspectWinSituation()
+        if (win_situation[0]):
+            print("Player " + win_situation[1] + " won!")
             return True
         else:
             return False
