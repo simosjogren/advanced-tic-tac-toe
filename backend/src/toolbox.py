@@ -2,6 +2,7 @@ import sys, json
 
 sys.path.append("./src")
 from movement import MovementInspection
+from AI_enemy import AI_enemy
 
 sys.path.append("../..")
 
@@ -12,7 +13,7 @@ class Toolbox():
     def initialize_board(self, boardsize, boardstatefile):
         # Checks the validity of the gameboard size.
         try:
-            # Creates the actual BOARD_SIZE x BOARD_SIZE -scaled board.
+                # Creates the actual BOARD_SIZE x BOARD_SIZE -scaled board.
             empty_board = []
             boardsize = int(boardsize)
             for i in range(boardsize):
@@ -36,13 +37,16 @@ class Toolbox():
         mv = MovementInspection(boardstate_filepath, boardstate)
         mv.inspectMoveLegality(X, Y, MARK)
         mv.saveMove()
-        win_situation = mv.inspectWinSituation()
+        win_situation = [False, ""]
         if (win_situation[0]):
             print("Player " + win_situation[1] + " won!")
             return True
         else:
             return False
-        
+
+    def make_AI_move(self, boardstate_filepath):
+        boardstate = self.load_gameboard(boardstate_filepath, return_string=False)
+        # enemy = AI_enemy(boardstate, boardstate_filepath, mark)       
     
     def load_gameboard(self, boardstate_filepath, return_string=True):
         with open(boardstate_filepath, 'r', encoding='utf-8') as boardobject:

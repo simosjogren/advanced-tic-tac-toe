@@ -1,10 +1,39 @@
-import json
+import json, numpy as np
 
 class MovementInspection():
     def __init__(self, boardfilepath, boardstate):
         self.boardfilepath = boardfilepath
         self.boardstate = boardstate
         self.boardsize = len(boardstate)
+        self.convertToNumpy()
+        self.convertFromNumpy()
+
+    def convertToNumpy(self):
+        # 'X' = 1, 'O' = -1, '-' = 0.
+        numpy_array = np.empty((self.boardsize, self.boardsize), dtype=np.int8)
+        for y in range(self.boardsize):
+            row_array = np.zeros(len(self.boardstate), dtype=np.int8)
+            for x in range(self.boardsize):
+                if (self.boardstate[y][x] == 'X'):
+                    row_array[x] = np.int8(1)
+                elif (self.boardstate[y][x] == 'O'):
+                    row_array[x] = np.int8(-1)
+            numpy_array[y] = row_array
+        self.boardstate = numpy_array
+    
+    def convertFromNumpy(self):
+        string_array = []
+        for y in range(self.boardsize):
+            row_array = []
+            for x in range(self.boardsize):
+                if (self.boardstate[y][x] == 1):
+                    row_array.append("X")
+                elif (self.boardstate[y][x] == -1):
+                    row_array.append("O")
+                elif (self.boardstate[y][x] == 0):
+                    row_array.append("-")
+            string_array.append(row_array)
+        self.boardstate = string_array
 
     def inspectMoveLegality(self, X, Y, MARK):
         next_position_mark = self.boardstate[X][Y]
@@ -27,7 +56,6 @@ class MovementInspection():
                 break
             elif (all(item == y[0] for item in y)):
                 return [True, y[0]]
-        
         # Vertical inspection
         for y in range(self.boardsize):
             y_count = 0
@@ -40,7 +68,6 @@ class MovementInspection():
                 y_count += 1
             if (y_count == self.boardsize):
                 return [True, mark]
-
         # Diagonal inspection 1
         counter_leftup_rightdown = 0
         for idx in range(self.boardsize):
@@ -52,7 +79,6 @@ class MovementInspection():
             counter_leftup_rightdown += 1
         if (counter_leftup_rightdown == self.boardsize):
             return [True, leftup_rightdown_mark]
-        
         # Diagonal inspection 2
         counter_rightup_leftdown = 0
         for idx in range(self.boardsize):
@@ -64,5 +90,5 @@ class MovementInspection():
             counter_rightup_leftdown += 1
         if (counter_rightup_leftdown == self.boardsize):
             return [True, rightup_leftdown_mark]
-
+        # Did not find any winning combinations. Continuing...
         return [False]

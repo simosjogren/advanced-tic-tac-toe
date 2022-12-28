@@ -33,10 +33,9 @@ def post_gameboard_state():
             return "Board state saved unsuccessfully", 500
     except:
         print("Making a move: ", gameboard_json["next_move"])
+        # TODO Make Toolbox a object
         game_ended = tb.make_player_move(gameboard_json["next_move"], CURRENT_BOARD_STATE_FILEPATH)
-        # TODO tee voittoilmoituksen lähettäminen huomenna!
-        #if (game_ended):
-        #    return { "winner": gameboard_json["next_move"][2] }
+        # TODO Send win information to frontend.
 
         return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH), 200
 
