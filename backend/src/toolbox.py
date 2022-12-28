@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, numpy as np
 
 sys.path.append("./src")
 from movement import MovementInspection
@@ -37,16 +37,20 @@ class Toolbox():
         mv = MovementInspection(boardstate_filepath, boardstate)
         mv.inspectMoveLegality(X, Y, MARK)
         mv.saveMove()
-        win_situation = [False, ""]
+        win_situation = mv.inspectWinSituation()
         if (win_situation[0]):
-            print("Player " + win_situation[1] + " won!")
+            print("Player " + str(win_situation[1]) + " won!")
             return True
         else:
             return False
 
     def make_AI_move(self, boardstate_filepath):
-        boardstate = self.load_gameboard(boardstate_filepath, return_string=False)
-        # enemy = AI_enemy(boardstate, boardstate_filepath, mark)       
+        # boardstate = self.load_gameboard(boardstate_filepath, return_string=False)
+        # enemy = AI_enemy(boardstate, boardstate_filepath, mark)
+        pass
+
+        # THIS WILL BE JUST TEMPORARY:
+        # mv = MovementInspection(boardstate_filepath, self.boardstate, convert=False)
     
     def load_gameboard(self, boardstate_filepath, return_string=True):
         with open(boardstate_filepath, 'r', encoding='utf-8') as boardobject:

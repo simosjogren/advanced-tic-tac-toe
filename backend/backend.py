@@ -36,6 +36,7 @@ def post_gameboard_state():
         # TODO Make Toolbox a object
         game_ended = tb.make_player_move(gameboard_json["next_move"], CURRENT_BOARD_STATE_FILEPATH)
         # TODO Send win information to frontend.
+        game_ended = tb.make_AI_move(CURRENT_BOARD_STATE_FILEPATH)
 
         return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH), 200
 

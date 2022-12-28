@@ -5,8 +5,6 @@ class MovementInspection():
         self.boardfilepath = boardfilepath
         self.boardstate = boardstate
         self.boardsize = len(boardstate)
-        self.convertToNumpy()
-        self.convertFromNumpy()
 
     def convertToNumpy(self):
         # 'X' = 1, 'O' = -1, '-' = 0.
@@ -50,45 +48,25 @@ class MovementInspection():
             boardobject.write(json.dumps(self.boardstate))
 
     def inspectWinSituation(self):
-        # Horisontal inspection
-        for y in self.boardstate:
-            if ('-' in y):
-                break
-            elif (all(item == y[0] for item in y)):
-                return [True, y[0]]
-        # Vertical inspection
-        for y in range(self.boardsize):
-            y_count = 0
-            for x in range(self.boardsize):
-                mark = self.boardstate[y][x]
-                if (mark == '-'):
-                    break
-                elif (mark != self.boardstate[y][0]):
-                    break
-                y_count += 1
-            if (y_count == self.boardsize):
-                return [True, mark]
+        '''
+        This function requires a numpy conversion and its done in the beginning and
+        in the end of this function.
+        '''
+        self.convertToNumpy()
+        # Horisontal & Vertical inspection
+        abs_boardsize = abs(self.boardsize)
+        for idx in range(self.boardsize):
+            if (sum(self.boardstate[idx,:]) == abs_boardsize):
+                return [True, self.boardstate[idx,0]]
+            elif (sum(self.boardstate[:,idx]) == abs_boardsize):
+                return [True, self.boardstate[0,idx]]
         # Diagonal inspection 1
-        counter_leftup_rightdown = 0
-        for idx in range(self.boardsize):
-            leftup_rightdown_mark = self.boardstate[idx][idx]
-            if (leftup_rightdown_mark == '-'):
-                break
-            if (leftup_rightdown_mark != self.boardstate[0][0]):
-                break
-            counter_leftup_rightdown += 1
-        if (counter_leftup_rightdown == self.boardsize):
-            return [True, leftup_rightdown_mark]
-        # Diagonal inspection 2
-        counter_rightup_leftdown = 0
-        for idx in range(self.boardsize):
-            rightup_leftdown_mark = self.boardstate[self.boardsize-1-idx][idx]
-            if (rightup_leftdown_mark == '-'):
-                break
-            if (rightup_leftdown_mark != self.boardstate[self.boardsize-1][0]):
-                break
-            counter_rightup_leftdown += 1
-        if (counter_rightup_leftdown == self.boardsize):
-            return [True, rightup_leftdown_mark]
-        # Did not find any winning combinations. Continuing...
+        diagonal_vector = np.diagonal(self.boardstate) * np.ones(self.boardsize, dtype=np.int8).T
+        if (diagonal_vector.sum() == abs_boardsize):
+            return [True, self.boardstate[0,0]]
+        # Flip the array 90 degrees, and then diagonal inspection 2
+        diagonal_vector = np.diagonal(np.rot90(self.boardstate))
+        if (diagonal_vector.sum() == abs_boardsize):
+            return [True, self.boardstate[self.boardsize-1,0]]
+        self.convertFromNumpy()
         return [False]
