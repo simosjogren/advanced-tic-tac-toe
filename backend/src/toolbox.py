@@ -19,7 +19,7 @@ class Toolbox():
             for i in range(boardsize):
                 x_row = []
                 for j in range(boardsize):
-                    x_row.append('-')
+                    x_row.append(0)
                 empty_board.append(x_row)
             # Writes the board into .txt-file.
             mv = MovementInspection(boardstatefile, empty_board)
@@ -33,9 +33,10 @@ class Toolbox():
         X = next_move[0]
         Y = next_move[1]
         MARK = next_move[2]
-        boardstate = self.load_gameboard(boardstate_filepath, return_string=False)
+        boardstate = self.load_gameboard(boardstate_filepath)
         mv = MovementInspection(boardstate_filepath, boardstate)
         mv.inspectMoveLegality(X, Y, MARK)
+        print(X, Y, MARK)
         mv.saveMove()
         win_situation = mv.inspectWinSituation()
         if (win_situation[0]):
@@ -45,14 +46,14 @@ class Toolbox():
             return False
 
     def make_AI_move(self, boardstate_filepath):
-        # boardstate = self.load_gameboard(boardstate_filepath, return_string=False)
+        # boardstate = self.load_gameboard(boardstate_filepath)
         # enemy = AI_enemy(boardstate, boardstate_filepath, mark)
         pass
 
         # THIS WILL BE JUST TEMPORARY:
         # mv = MovementInspection(boardstate_filepath, self.boardstate, convert=False)
     
-    def load_gameboard(self, boardstate_filepath, return_string=True):
+    def load_gameboard(self, boardstate_filepath, return_string=False):
         with open(boardstate_filepath, 'r', encoding='utf-8') as boardobject:
             current_board = json.load(boardobject)
             if return_string:

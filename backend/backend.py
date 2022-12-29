@@ -28,7 +28,7 @@ def post_gameboard_state():
         init_parameters = gameboard_json["init"]
         init_status = tb.initialize_board(init_parameters["boardsize"], CURRENT_BOARD_STATE_FILEPATH)
         if init_status:
-            return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH), 200
+            return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH, return_string=True), 200
         else:
             return "Board state saved unsuccessfully", 500
     except:
@@ -37,8 +37,9 @@ def post_gameboard_state():
         game_ended = tb.make_player_move(gameboard_json["next_move"], CURRENT_BOARD_STATE_FILEPATH)
         # TODO Send win information to frontend.
         game_ended = tb.make_AI_move(CURRENT_BOARD_STATE_FILEPATH)
-
-        return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH), 200
+        gameboard_to_return = tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH, return_string=True)
+        print(gameboard_to_return)
+        return gameboard_to_return, 200
 
 if __name__=="__main__":
     app.run(debug=True)

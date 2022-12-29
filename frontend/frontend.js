@@ -9,22 +9,11 @@ const BOARD_STATE_ENCODING = 'utf8';
 let gameData = {
     gameboard: [],
     board_size: null,
-    player_mark: 'X'
+    player_mark: '1'
 }
 
 const fs = require('fs');
 const spawner = require('child_process').spawn;
-
-
-// onClick when pressed the start game button.
-function initializeGame() {
-    document.getElementById("start_game_button").disabled = true;
-    gameData.board_size = document.getElementById("board_size_text").value;
-    initialize_backend_board();
-    // setInterval(checkBoardState, INTERVAL_SLEEPTIME_MS);
-    // player_makes_move(1, 2, 'X');
-};
-
 
 
 function checkBoardState() {
@@ -72,6 +61,16 @@ function initialize_backend_board() {
 };
 
 
+// onClick when pressed the start game button.
+function initializeGame() {
+    document.getElementById("start_game_button").disabled = true;
+    gameData.board_size = document.getElementById("board_size_text").value;
+    initialize_backend_board();
+    // setInterval(checkBoardState, INTERVAL_SLEEPTIME_MS);
+    // player_makes_move(1, 2, 'X');
+};
+
+
 function player_makes_move(x, y, mark) {
     const nextMove = {
         next_move: [x, y, mark]
@@ -81,44 +80,40 @@ function player_makes_move(x, y, mark) {
 };
 
 
-function get_onClickevent_link(x, y, marking) {
-    // Returns a onClick event link for given image.
-    // If the mark is NOT null, then we dont give a link to the mark.
-    if (marking !== '-') {
-        return " onClick=\"player_makes_move(" + x.toString() +
-            ", " + y.toString() + ", \'" + marking + "\')\"";
-    }
-}
-
-
 function get_marking_graphics(x, y) {
-    marking = gameData.gameboard[x][y]
-    if (marking === '-') {
-        return "<img src=\"./images/empty_mark.jpg\" " + get_onClickevent_link(x, y, gameData.player_mark) + ">";
-    } else if (marking === 'X') {
-        return "<img src=\"./images/x_mark.jpg\" " + get_onClickevent_link(x, y, gameData.player_mark) + ">";
-    } else if (marking === 'O') {
-        return "<img src=\"./images/o_mark.jpg\" " + get_onClickevent_link(x, y, gameData.player_mark) + ">";
+    let marking = gameData.gameboard[x][y];
+    const image_element = new Image();
+    if (marking === 0) {
+        image_element.src = './images/empty_mark.jpg';
+    } else if (marking === 1) {
+        image_element.src = './images/x_mark.jpg';
+    } else if (marking === -1) {
+        image_element.src = './images/o_mark.jpg';
     }
+    image_element.addEventListener("click", () => {
+        player_makes_move(x, y, gameData.player_mark);
+    })
+    return image_element;
 };
 
 
 function draw_rectangle_table() {
     // Builds a scalable rectangle-shaped tictactoe-table as a string.
-    var rows = [];
-    table_size = gameData.board_size;
-    for (let y = 1; y <= table_size; y++) {
-        var slots_in_row = [];
-        for (let x = 1; x <= table_size; x++) {
-            slots_in_row.push('<td>' + get_marking_graphics(x - 1, y - 1) + '</td>');
-        }
-        rows.push('<tr>' + slots_in_row.join('') + '</tr>');
-    }
-    // Create a HTML element for that.
     let table = document.createElement('table');
     table.setAttribute('id', 'tictactoe_table');
-    table.innerHTML = rows.join('');
-
+    table_size = gameData.board_size;
+    for (let y = 1; y <= table_size; y++) {
+        tr = document.createElement('tr');
+        tr.setAttribute('id', "tr_ " + y.toString())
+        for (let x = 1; x <= table_size; x++) {
+            // slots_in_row.push('<td>' + get_marking_graphics(x - 1, y - 1) + '</td>');
+            const td = document.createElement('td');
+            td.setAttribute('id', "td_ " + x.toString() + y.toString())
+            td.appendChild(get_marking_graphics(x - 1, y - 1))
+            tr.appendChild(td)
+        }
+        table.appendChild(tr);
+    }
     return table;
 };
 
