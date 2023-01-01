@@ -1,7 +1,9 @@
 import json, numpy as np
 
+CURRENT_BOARD_STATE_FILEPATH = "json_api/current_board_state.json"
+
 class MovementInspection():
-    def __init__(self, boardfilepath, boardstate):
+    def __init__(self, boardstate, boardfilepath=CURRENT_BOARD_STATE_FILEPATH):
         self.boardfilepath = boardfilepath
         self.boardstate = np.array(boardstate, dtype=np.int8)
         self.boardsize = len(boardstate)
@@ -10,7 +12,7 @@ class MovementInspection():
         next_position_mark = self.boardstate[X][Y]
         if (next_position_mark == 0):
             self.boardstate[X][Y] = np.int8(MARK)
-            return self.boardstate
+            return self.boardstate.tolist()
         else:
             print("Position is already taken. Current position belongs to " + str(next_position_mark))
             return False
