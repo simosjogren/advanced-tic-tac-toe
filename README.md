@@ -1,7 +1,10 @@
 Advanced-tic-tac-toe
 
-Project for making a classic tic-tac-toe -game with AI based enemy functionality.
-To get maximize the learning, im trying to implement that AI using neuronetworks, although LSE or basic Q-learning would be enough.
+Project for making a classic tic-tac-toe -game with neural network -based enemy functionality.
 
-Backend will be based on Python due to Python's great ML modules. Frontend HTML/JS. Backend HTTP-requests are implemented by Python flask and frontend by using JS fetch.
-Final optimal step would be also to make the tictactoe-board scalable for the AI.
+Backend will be based on Python due to it's great ML modules. Frontend HTML/JS. Backend HTTP-requests are implemented by Python flask and frontend by using JS fetch.
+
+TODO:
+- Train different neural network for different board sizes.
+- More aesthetic JS frontend
+- Docker & integrate into cloud.
