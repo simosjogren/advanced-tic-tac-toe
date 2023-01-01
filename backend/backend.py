@@ -3,7 +3,7 @@ import json, sys
 from flask_cors import CORS
 
 from src.toolbox import Toolbox
-tb = Toolbox()
+from src.exceptions import BoardInitError
 
 CURRENT_BOARD_STATE_FILEPATH = "json_api/current_board_state.json"
 
@@ -18,28 +18,28 @@ def after_request(response):
 
 @app.route("/get-gameboard", methods=['GET'])
 def get_gameboard_state():
+    tb = Toolbox( {"init": {}, "next_move": [] }, CURRENT_BOARD_STATE_FILEPATH)
     gameboard = tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH)
     return jsonify(gameboard), 200
 
 @app.route("/post-gameboard", methods=['POST'])
 def post_gameboard_state():
     gameboard_json = request.get_json()
-    try:
-        init_parameters = gameboard_json["init"]
-        init_status = tb.initialize_board(init_parameters["boardsize"], CURRENT_BOARD_STATE_FILEPATH)
-        if init_status:
-            return tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH, return_string=True), 200
-        else:
-            return "Board state saved unsuccessfully", 500
-    except:
-        print("Making a move: ", gameboard_json["next_move"])
-        # TODO Make Toolbox a object
-        game_ended = tb.make_player_move(gameboard_json["next_move"], CURRENT_BOARD_STATE_FILEPATH)
-        # TODO Send win information to frontend.
-        game_ended = tb.make_AI_move(CURRENT_BOARD_STATE_FILEPATH)
-        gameboard_to_return = tb.load_gameboard(CURRENT_BOARD_STATE_FILEPATH, return_string=True)
-        print(gameboard_to_return)
-        return gameboard_to_return, 200
+    # try:
+    tb = Toolbox(gameboard_json, CURRENT_BOARD_STATE_FILEPATH)
+    if (tb.gb_init != {}):
+        game_state = tb.initialize_board()
+        print(game_state)
+        return json.dumps(game_state), 200
+    elif (tb.gb_next_move != []):
+        game_state = tb.make_player_move()
+        print(game_state)
+        game_state = tb.make_AI_move(game_state["boardstate"])
+        return json.dumps(game_state), 200
+    # except KeyError:
+     #    return {}, 500
+        
+
 
 if __name__=="__main__":
     app.run(debug=True)
