@@ -6,7 +6,8 @@ const BOARD_STATE_FILE = "./current_board_state.json";
 const BOARD_STATE_ENCODING = 'utf8';
 
 // Objects
-let gameData = {
+const stringTranslations = Object.assign({}, { '1': 'X', '0': '-', '-1': 'O' });
+const gameData = {
     gameboard: [],
     board_size: null,
     player_mark: '1'
@@ -30,6 +31,16 @@ function checkBoardState() {
 };
 
 
+function gameOver(winner) {
+    winner_string = stringTranslations[winner];
+    document.getElementById("start_game_button").disabled = false;
+    const winner_text = "Game Over. Winner is: " + stringTranslations[winner];
+    console.log(winner_text);
+    winner_zone = document.getElementById("winner_zone");
+    winner_zone.innerHTML = winner_text;
+}
+
+
 function post_nextmove(nextMove, init_run = false) {
     fetch('http://127.0.0.1:5000/post-gameboard', {
         method: 'POST',
@@ -43,36 +54,43 @@ function post_nextmove(nextMove, init_run = false) {
             if (init_run == false) {
                 document.getElementById("tictactoe_table").remove();
             }
-            gamemobard_zone = document.getElementById("gameboard_zone");
+            gameboard_zone = document.getElementById("gameboard_zone");
             console.log(data)
-            gameData.gameboard = data;
+            gameData.gameboard = data["boardstate"];
             tictactoe_table_element = draw_rectangle_table()
             gameboard_zone.appendChild(tictactoe_table_element);
+            if (data["game_ended"] == true) {
+                gameOver(data["winner"])
+            }
         });
+};
+
+
+// onClick when pressed the start game button.
+function initializeGame() {
+    // First reset the div.
+    document.getElementById("gameboard_zone").innerHTML = '';
+    document.getElementById("winner_zone").innerHTML = '';
+    document.getElementById("start_game_button").disabled = true;
+    // Lets catch the desired board size.
+    gameData.board_size = document.getElementById("board_size_text").value;
+    initialize_backend_board();
 };
 
 
 function initialize_backend_board() {
     // Nextmove isnt actually a move, it is a initialization of the board.
     const nextMove = {
-        init: { boardsize: gameData.board_size }
+        init: { boardsize: gameData.board_size },
+        next_move: []
     };
     post_nextmove(nextMove, true)
 };
 
 
-// onClick when pressed the start game button.
-function initializeGame() {
-    document.getElementById("start_game_button").disabled = true;
-    gameData.board_size = document.getElementById("board_size_text").value;
-    initialize_backend_board();
-    // setInterval(checkBoardState, INTERVAL_SLEEPTIME_MS);
-    // player_makes_move(1, 2, 'X');
-};
-
-
 function player_makes_move(x, y, mark) {
     const nextMove = {
+        init: {},
         next_move: [x, y, mark]
     };
     console.log("Making a move x:", x, ", y:", y);

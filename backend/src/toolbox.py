@@ -1,4 +1,4 @@
-import sys, json, numpy as np
+import sys, json, numpy as np, os
 
 sys.path.append("./src")
 from movement import MovementInspection
@@ -6,10 +6,8 @@ from AI_enemy import AI_enemy
 
 sys.path.append("../..")
 
-CURRENT_BOARD_STATE_FILEPATH = "json_api/current_board_state.json"
-
 class Toolbox():
-    def __init__(self, gameboard, board_filepath=CURRENT_BOARD_STATE_FILEPATH):
+    def __init__(self, gameboard, board_filepath):
         # This try is mainly only for the get-method.
         try:
             self.gb_init = gameboard["init"]
@@ -17,8 +15,7 @@ class Toolbox():
         except:
             print("Toolbox initialization failed.")
         self.board_filepath = board_filepath
-        self.AI = AI_enemy(self.board_filepath, 'O')
-        pass
+        self.boardstate = []
 
     def initialize_board(self):
         boardsize = self.gb_init["boardsize"]
@@ -33,21 +30,40 @@ class Toolbox():
                     x_row.append(0)
                 empty_board.append(x_row)
             # Writes the board into .txt-file.
-            mv = MovementInspection(empty_board, self.board_filepath)
+            self.boardstate = empty_board
+            mv = MovementInspection(self.boardstate, self.board_filepath)
             mv.saveMove()
         except ValueError:
             print("Invalid board size.")
             empty_board = []
-        print({"game_ended": False, "boardstate": empty_board, "winner": ""})
-        return {"game_ended": False, "boardstate": empty_board, "winner": ""}
+        return {"game_ended": False, "boardstate": self.boardstate, "winner": ""}
     
     def make_player_move(self):
         X = self.gb_next_move[0]
         Y = self.gb_next_move[1]
         MARK = self.gb_next_move[2]
-        boardstate = self.load_gameboard(self.board_filepath)
-        mv = MovementInspection(boardstate, self.board_filepath)
-        boardstate = mv.inspectMoveLegality(X, Y, MARK)
+        mv = MovementInspection(self.boardstate, self.board_filepath)
+        self.boardstate = mv.inspectMoveLegality(X, Y, MARK)
+        mv.saveMove()
+        win_situation = mv.inspectWinSituation()
+        if (win_situation[0]):
+            game_ended = True
+            winner = str(win_situation[1])
+            print("Player " + winner + " won!")
+        else:
+            winner = ""
+            game_ended = False
+        return {"game_ended": game_ended, "boardstate": self.boardstate, "winner": winner}
+    
+    def initAI(self, size):
+        boardsize_string = str(size)
+        filename_string = "./trained_models/model_" + boardsize_string + "x" + boardsize_string + ".pkl"
+        self.AI = AI_enemy('O', filename_string)
+
+    def make_AI_move(self, board):
+        next_move = self.AI.count_next_move(board)
+        mv = MovementInspection(board, self.board_filepath)
+        boardstate = mv.inspectMoveLegality(next_move[0], next_move[1], -1)
         mv.saveMove()
         win_situation = mv.inspectWinSituation()
         if (win_situation[0]):
@@ -58,18 +74,17 @@ class Toolbox():
             winner = ""
             game_ended = False
         return {"game_ended": game_ended, "boardstate": boardstate, "winner": winner}
-
-    def make_AI_move(self, board, boardstate_filepath=CURRENT_BOARD_STATE_FILEPATH):
-        # boardstate = self.load_gameboard(boardstate_filepath)
-        # enemy = AI_enemy(boardstate, boardstate_filepath, mark)
-        next_move = self.AI.count_next_move(board)
-        pass
-
     
-    def load_gameboard(self, boardstate_filepath, return_string=False):
-        with open(boardstate_filepath, 'r', encoding='utf-8') as boardobject:
+    def load_gameboard(self, return_string=False):
+        parentfolders = os.path.split(self.board_filepath)[0]
+        if (not os.path.exists(parentfolders)):
+            print(parentfolders, " did not exist. Creating...")
+            os.makedirs(parentfolders)
+
+        with open(self.board_filepath, 'r', encoding='utf-8') as boardobject:
             current_board = json.load(boardobject)
             if return_string:
                 return json.dumps(current_board)
             else:
-                return current_board
+                self.boardstate = current_board
+                return self.boardstate

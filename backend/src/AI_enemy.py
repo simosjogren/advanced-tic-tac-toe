@@ -2,13 +2,11 @@ from movement import MovementInspection
 import numpy as np, pickle, sys, copy
 
 sys.path.append('../')
-import train_model.model
 
 class AI_enemy():
-    def __init__(self, boardfilepath, mark):
+    def __init__(self, mark, model_filename):
         self.mark = mark
-        # self.mv = MovementInspection(self.board, boardfilepath)
-        with open('./src/model.pkl', 'rb') as f:
+        with open(model_filename, 'rb') as f:
             self._model = pickle.load(f)
 
     def getAvailableMoves(self, board):
@@ -20,21 +18,19 @@ class AI_enemy():
         return availableMoves
 
     def count_next_move(self, boardstate):
-        print("TILA 1: ", boardstate)
+        boardsize = len(boardstate)
         available_moves = self.getAvailableMoves(boardstate)
-        print("Available moooooves: ", available_moves)
         maxValue = 0
         bestMove = available_moves[0]
         for availableMove in available_moves:
-            # get a copy of a board
-            boardCopy = copy.deepcopy(np.array(boardstate, dtype=np.int8).ravel())
-            print(boardCopy)
-            # boardCopy[availableMove[0]][availableMove[1]] = nnPlayer
-            value = self._model.predict(boardCopy, 2)
+            boardCopy = copy.deepcopy(boardstate)
+            boardCopy[availableMove[0]][availableMove[1]] = -1
+            # Number two in the below as index is temporary.
+            value = self._model.predict(np.array(boardCopy).reshape(-1, np.power(boardsize, 2)))[0][2]
+            print(value)
             if value > maxValue:
                 maxValue = value
                 bestMove = availableMove
         selectedMove = bestMove
-        print("Best mooove: ", selectedMove)
-        self._model.predict(boardstate, 0)
+        print("Best move: ", selectedMove)
         return selectedMove
