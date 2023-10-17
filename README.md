@@ -1,4 +1,4 @@
-Advanced-tic-tac-toe
+Advanced-tic-tac-toe (free time project)
 
 Project for making a classic tic-tac-toe -game with neural network -based enemy functionality.
 
@@ -6,5 +6,5 @@ Backend will be based on Python due to it's great ML modules. Frontend HTML/JS. 
 
 TODO:
 - Train different neural networks for different board sizes.
-- More aesthetic JS frontend
-- Docker & integrate into cloud.
+- Smoother JS frontend
+- Dockerize & integrate into server.
